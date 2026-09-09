@@ -181,6 +181,8 @@ nix fmt
 nix flake check
 ```
 
+### AI Disclosure
+
 The initial packaging, NixOS module, tests, and documentation in this project
 were developed with AI assistance. The resulting changes were reviewed and
 validated with reproducible Nix builds and automated tests.
