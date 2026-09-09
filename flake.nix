@@ -13,6 +13,10 @@
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
     in
     {
+      overlays.default = final: _prev: {
+        setec = final.callPackage ./setec.nix { };
+      };
+
       packages = forAllSystems (
         system:
         let
@@ -24,6 +28,28 @@
           default = setec;
         }
       );
+
+      checks = forAllSystems (
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+        {
+          module-eval = import ./tests/eval.nix {
+            inherit nixpkgs pkgs system;
+            module = self.nixosModules.setec;
+          };
+          module-vm = import ./tests/module.nix {
+            inherit pkgs;
+            module = self.nixosModules.setec;
+          };
+        }
+      );
+
+      nixosModules = {
+        setec = import ./module.nix;
+        default = self.nixosModules.setec;
+      };
 
       formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt-tree);
     };
