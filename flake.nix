@@ -47,7 +47,7 @@
       );
 
       nixosModules = {
-        setec = import ./module.nix;
+        setec = import ./nixos/setec.nix;
         default = self.nixosModules.setec;
       };
 
