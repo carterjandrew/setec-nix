@@ -1,3 +1,7 @@
+# important disclosure
+
+Even though there is not much going on here, it has yet to be validated by someone with more experience than me for being secure. Given I have no idea what I'm doing, I'll wait until I have some audits before saying this is something reasonable to use. 
+
 # setec-nix
 
 Nix package and NixOS module for
