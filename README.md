@@ -28,8 +28,7 @@ nix run github:OWNER/setec-nix -- help
 ```
 
 The flake exposes `packages.<system>.setec`, `packages.<system>.default`, and an
-overlay as `overlays.default`. The classic `default.nix` entry point remains
-available for `nix-build`.
+overlay as `overlays.default`. You can also build the package with `nix-build`.
 
 ## NixOS module
 
@@ -63,6 +62,24 @@ Add the flake as an input and import its module:
     };
 }
 ```
+
+For configurations that pin sources without flakes, fetch the repository as a
+path and import its `nixos` directory. For example:
+
+```nix
+{ ... }:
+let
+  setec-nix = builtins.fetchGit {
+    url = "https://github.com/OWNER/setec-nix";
+    rev = "<commit>";
+  };
+in
+{
+  imports = [ (setec-nix + "/nixos") ];
+}
+```
+
+You can find the nixos module itself at `nixos/default.nix`
 
 Both `hostname` and `encryption.backend` must be explicitly configured. The
 service keeps its state, encrypted database, audit log, and default TPM key in

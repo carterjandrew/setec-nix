@@ -35,19 +35,21 @@
           pkgs = nixpkgs.legacyPackages.${system};
         in
         {
-          module-eval = import ./tests/eval.nix {
-            inherit nixpkgs pkgs system;
-            module = self.nixosModules.setec;
-          };
+          module-eval =
+            assert self.nixosModules.default == self.nixosModules.setec;
+            import ./tests/eval.nix {
+              inherit nixpkgs pkgs system;
+              module = ./nixos;
+            };
           module-vm = import ./tests/module.nix {
             inherit pkgs;
-            module = self.nixosModules.setec;
+            module = self.nixosModules.default;
           };
         }
       );
 
       nixosModules = {
-        setec = ./nixos/setec.nix;
+        setec = ./nixos;
         default = self.nixosModules.setec;
       };
 
