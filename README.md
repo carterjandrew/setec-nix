@@ -28,8 +28,7 @@ nix run github:OWNER/setec-nix -- help
 ```
 
 The flake exposes `packages.<system>.setec`, `packages.<system>.default`, and an
-overlay as `overlays.default`. The classic `default.nix` entry point remains
-available for `nix-build`.
+overlay as `overlays.default`. You can also build the package with `nix-build`.
 
 ## NixOS module
 
@@ -63,6 +62,80 @@ Add the flake as an input and import its module:
     };
 }
 ```
+
+You can also use the flake lock file to fetch and pin this repository without
+evaluating it as a flake. Set `flake = false` on the input, then use the input
+as a source path:
+
+```nix
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    setec-nix = {
+      url = "github:OWNER/setec-nix";
+      flake = false;
+    };
+  };
+
+  outputs =
+    { nixpkgs, setec-nix, ... }:
+    {
+      nixosConfigurations.my-server = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          "${setec-nix}/nixos"
+          {
+            services.setec = {
+              enable = true;
+              hostname = "secrets";
+              authKeyFile = "/run/secrets/setec-auth-key";
+
+              encryption.backend = "tpm";
+            };
+          }
+        ];
+      };
+    };
+}
+```
+
+In this form, `flake.lock` records the source revision, but Nix does not
+evaluate this repository's `flake.nix` or expose its flake outputs. Instead,
+the `setec-nix` argument refers to the fetched source tree.
+
+If your NixOS configuration does not use flakes at all, it can fetch the same
+source directly. A traditional `configuration.nix` can include the module like
+this:
+
+```nix
+{ ... }:
+
+let
+  setec-nix = builtins.fetchGit {
+    url = "https://github.com/OWNER/setec-nix";
+    rev = "<commit>";
+  };
+in
+{
+  imports = [ "${setec-nix}/nixos" ];
+
+  services.setec = {
+    enable = true;
+    hostname = "secrets";
+    authKeyFile = "/run/secrets/setec-auth-key";
+
+    encryption.backend = "tpm";
+  };
+}
+```
+
+Replace `<commit>` with a full commit revision so the fetched source is pinned.
+Other source-management options include
+[npins](https://github.com/andir/npins), `builtins.fetchTarball`,
+[niv](https://github.com/nmattia/niv), and a vendored or local checkout. No
+matter how the source is obtained, add its `nixos` directory to the NixOS
+module list. That directory's `default.nix` is the plain-file module entry
+point, and NixOS accepts its path directly without an explicit `import` call.
 
 Both `hostname` and `encryption.backend` must be explicitly configured. The
 service keeps its state, encrypted database, audit log, and default TPM key in
