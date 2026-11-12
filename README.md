@@ -18,13 +18,13 @@ systemd service for NixOS.
 Build the package with:
 
 ```console
-nix build github:OWNER/setec-nix
+nix build github:carterjandrew/setec-nix
 ```
 
 Run the Setec CLI without installing it:
 
 ```console
-nix run github:OWNER/setec-nix -- help
+nix run github:carterjandrew/setec-nix -- help
 ```
 
 The flake exposes `packages.<system>.setec`, `packages.<system>.default`, and an
@@ -38,7 +38,7 @@ Add the flake as an input and import its module:
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    setec-nix.url = "github:OWNER/setec-nix";
+    setec-nix.url = "github:carterjandrew/setec-nix";
   };
 
   outputs =
@@ -72,7 +72,7 @@ as a source path:
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     setec-nix = {
-      url = "github:OWNER/setec-nix";
+      url = "github:carterjandrew/setec-nix";
       flake = false;
     };
   };
@@ -112,7 +112,7 @@ this:
 
 let
   setec-nix = builtins.fetchGit {
-    url = "https://github.com/OWNER/setec-nix";
+    url = "https://github.com/carterjandrew/setec-nix";
     rev = "<commit>";
   };
 in
