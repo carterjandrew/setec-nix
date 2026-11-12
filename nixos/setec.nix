@@ -53,7 +53,11 @@ in
       type = lib.types.nullOr lib.types.str;
       default = null;
       example = "https://headscale.example.com";
-      description = "Optional Tailscale-compatible control server URL.";
+      description = ''
+                Optional Tailscale-compatible control server URL. The control server
+                must advertise TLS certificate domains and support certificate issuance
+                for Setec's embedded tsnet HTTPS listener.
+        			'';
     };
 
     authKeyFile = lib.mkOption {

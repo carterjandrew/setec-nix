@@ -213,6 +213,26 @@ Use `loginServer` when enrolling with Headscale or another compatible control
 server. `environmentFile` may also provide advanced tsnet variables. If both
 credential sources define `TS_AUTHKEY`, `authKeyFile` takes precedence.
 
+### Headscale and HTTPS
+
+Setec requires its control server to advertise TLS certificate domains. It then obtains certificates through tsnet. Upstream Setec does not expose flags for supplying a custom server certificate and private key. Enrollment alone is therefore insufficient: without certificate domains, Setec exits with `tailscale did not provide TLS domains`.
+
+On the Headscale server, configure a lowercase public `dns.base_domain` you control, enable `dns.magic_dns` and `dns.certificates.enabled`, and configure `dns.challenge.provider` to publish ACME DNS-01 challenges through your DNS provider. Set `dns.certificates.zone` if the challenge zone differs from the base domain. These are Headscale settings, configured separately from this module; see the upstream [configuration validation](https://github.com/juanfont/headscale/blob/main/hscontrol/types/config.go).
+
+On the Setec host, the existing options select the control server:
+
+```nix
+services.setec = {
+  enable = true;
+  hostname = "secrets";
+  loginServer = "https://headscale.example.com";
+  authKeyFile = "/run/secrets/setec-auth-key";
+  encryption.backend = "tpm";
+};
+```
+
+No separate `tailscale serve` process or certificate-file option is needed: Setec runs its own tsnet HTTPS listener. This integration has not yet been validated here against a live Headscale server with ACME issuance.
+
 ### S3 backups
 
 Setec can upload the encrypted database to S3 when it changes:
